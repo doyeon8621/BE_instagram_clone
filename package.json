@@ -1,0 +1,23 @@
+{
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "name": "clone_instagram",
+  "description": "항해99 4기 7주차 clone coding - instagram",
+  "version": "1.0.0",
+  "main": "app.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://TnIoP@github.com/TnIoP/BE_instagram_clone.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TnIoP/BE_instagram_clone/issues"
+  },
+  "homepage": "https://github.com/TnIoP/BE_instagram_clone#readme"
+}
