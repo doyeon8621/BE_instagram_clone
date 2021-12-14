@@ -2,9 +2,9 @@ const express = require('express');
 const { Op } = require('sequelize');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
-const User = require('../models/users');
-// const {User} = require('../models/users');
-const {Post} = require('../models/posts');
+const { Post, User } = require('../models');
+const multer = require('multer');
+const storage = require('../middlewares/uploade');
 const authMiddleware = require('../middlewares/auth-middleware');
 
 // 회원가입
@@ -57,9 +57,18 @@ router.post('/login', async (req, res) => {
 router.get('/me', authMiddleware, async (req, res) => {
     const { user } = res.locals;
     const userId = user.userId;
-    let userInfo = await User.findOne({ 
-        attributes: [ 'userId', 'userEmail', 'userName', 'nickname', 'imageUrl_profile', 'introduce', 'phoneNumber', 'createdAt'],
-        where: { userId } 
+    let userInfo = await User.findOne({
+        attributes: [
+            'userId',
+            'userEmail',
+            'userName',
+            'nickname',
+            'imageUrl_profile',
+            'introduce',
+            'phoneNumber',
+            'createdAt',
+        ],
+        where: { userId },
     });
 
     // 유저 가입일
@@ -76,46 +85,73 @@ router.get('/me', authMiddleware, async (req, res) => {
     });
 });
 
-module.exports = router;
-// const authMiddleware = require('../middlewares/auth-middleware');
-
-
-//마이페이지 정보조회 & 마이페이지 수정페이지 최초 조회 같이사용
-// router.get('/:userId', async(req, res)=>{
-//     const {userId} = req.params;
-//     try{
-//         const user =await User.find({
-//             attribute:['userEmail', 'userName' , 'nickname', 'imageUrl_profile', 'introduce', 'phoneNumber'],
-//             where :{userId :userId}
-//         });
-//         res.send({user})
-//     }catch(error){
-//         res.statusCode(400)
-//     }
-// });
-//내가 작성한 게시물 
-router.get('/:userId/posts', async(req, res)=>{
-    const {userId} = req.params;
-    try{
+//내가 작성한 게시물
+router.get('/:userId/posts', authMiddleware, async (req, res) => {
+    const { userId } = res.locals.user;
+    try {
         const posts = await Post.findAll({
-            where:{userId :userId}
+            where: { userId: userId },
         });
-        if(posts.length == 0){
-            res.statusCode(204)
-        }else{
-            res.statusCode(200).send({posts})
+        if (posts.length == 0) {
+            res.status(204).send({});
+        } else {
+            res.status(200).send({ posts });
         }
-    }catch(error){
-        res.statusCode(400).send(error)
+    } catch (error) {
+        res.status(400).send(error);
     }
 });
 //프로필 이미지 업로드
-router.post('/images', async(req, res)=>{
-    try{
-
-    }catch(error){
-        
+const upload = multer({ storage: storage }).single('img');
+router.post('/:userId', authMiddleware, async (req, res) => {
+    try {
+        upload(req, res, (err) => {
+            if (err) {
+                return res.status(400);
+            } else {
+                return res.status(201).send({
+                    //성공하면 파일경로, 파일 이름 클라이언트로
+                    url: res.req.file.path, //path랑
+                    fileName: res.req.file.filename, //filename
+                });
+            }
+        });
+    } catch (error) {
+        res.status(400).send(error);
     }
-})
+});
+//마이페이지/내 정보 수정
+router.put('/:userId', authMiddleware, async (req, res) => {
+    const { nickname, userName, imageUrl_profile, introduce, phoneNumber } =
+        req.body;
+    const { userId } = res.locals.user;
+    try {
+        const existNickname = await User.findOne({
+            where: { nickname: nickname },
+        });
+        if (existNickname.length) {
+            res.status(400).send({
+                message: '사용중인 닉네임 입니다',
+            });
+        } else if (nickname == '') {
+            res.status(400).send({});
+        }
+        await User.update(
+            {
+                nickname: nickname,
+                userName: userName,
+                imageUrl_profile: imageUrl_profile,
+                introduce: introduce,
+                phoneNumber: phoneNumber,
+            },
+            {
+                where: { userId: userId },
+            }
+        );
+        res.status(204).send({});
+    } catch (error) {
+        res.status(400).send({});
+    }
+});
 
 module.exports = router;
