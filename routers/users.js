@@ -127,7 +127,7 @@ router.get('/:userId/posts', authMiddleware, async (req, res) => {
 
 //프로필 이미지 업로드
 const upload = multer({ storage: storage }).single('img');
-router.post('/:userId', authMiddleware, async (req, res) => {
+router.post('/:userId',  async (req, res) => {
     try {
         upload(req, res, (err) => {
             if (err) {
@@ -159,6 +159,8 @@ router.put('/:userId', authMiddleware, async (req, res) => {
                 message: '사용중인 닉네임 입니다',
             });
         } else if (nickname == '') {
+            res.status(400).send({});
+        } else if (userName == ''){
             res.status(400).send({});
         }
         await User.update(
