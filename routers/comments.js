@@ -37,3 +37,6 @@ router.delete('/comments/:commentId', authMiddleware, async (req, res) => {
     await Comments.deleteOne({ userId, commentId });
     res.send({ result: 'success' });
   });
+
+
+module.exports = router;
