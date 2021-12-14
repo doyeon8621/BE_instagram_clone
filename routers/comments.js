@@ -11,6 +11,22 @@ router.get('/:postId', authMiddleware, async (req, res) => {
             order: [['postId', 'DESC']], // 내림차순으로 정렬
             where: { postId },
         });
+
+        // let { commentId, content, userId, createdAt } = comments;
+
+        // let tempTime =
+        //     createdAt.getFullYear() +
+        //     '-' +
+        //     ('0' + (createdAt.getMonth() + 1)).slice(-2) +
+        //     '-' +
+        //     ('0' + createdAt.getDate()).slice(-2) +
+        //     ' ' +
+        //     ('0' + createdAt.getHours()).slice(-2) +
+        //     ':' +
+        //     ('0' + createdAt.getMinutes()).slice(-2) +
+        //     ':' +
+        //     ('0' + createdAt.getSeconds()).slice(-2);
+
         res.send({ comments });
     } catch (err) {
         res.status(400).send({

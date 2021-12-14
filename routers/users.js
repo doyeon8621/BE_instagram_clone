@@ -72,7 +72,6 @@ router.get('/me', authMiddleware, async (req, res) => {
     });
 
     let {
-        userIds,
         userEmail,
         userName,
         nickname,
@@ -97,14 +96,14 @@ router.get('/me', authMiddleware, async (req, res) => {
 
     res.send({
         // default 200
-        userIds,
+        userId,
         userEmail,
         userName,
         nickname,
         imageUrl_profile,
         introduce,
         phoneNumber,
-        createdAt,
+        tempTime,
     });
 });
 
