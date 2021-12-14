@@ -25,18 +25,18 @@ sequelize.sync({force:false})
     console.log(err);
   });
   
-// const postsRouter = require('./routers/posts');
-// const userRouter = require('./routers/user');
-// const commentRouter = require('./routers/comment');
+const postsRouter = require('./routers/posts');
+ const userRouter = require('./routers/users');
+const commentRouter = require('./routers/comments');
 
 
 app.use(express.urlencoded({ extended: false }));
-app.use(express.static('public'));
+app.use(express.static('public')); 
 app.use(express.json());
 
-// app.use('/api', express.urlencoded({ extended: false }), postsRouter);
-// app.use('/api', express.urlencoded({ extended: false }), userRouter);
-// app.use('/api', express.urlencoded({ extended: false }), commentRouter);
+ app.use('/api/posts', express.urlencoded({ extended: false }), postsRouter);
+ app.use('/api/users', express.urlencoded({ extended: false }), userRouter);
+ app.use('/api/comments', express.urlencoded({ extended: false }), commentRouter);
 
 app.listen(port, () => {
   console.log(`listening at http://localhost:${port}`);
