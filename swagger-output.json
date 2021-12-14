@@ -14,6 +14,18 @@
   "consumes": [],
   "produces": [],
   "paths": {
+    "/": {
+      "get": {
+        "tags": [],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/users/": {
       "post": {
         "tags": [],
@@ -109,13 +121,13 @@
         }
       }
     },
-    "/api/comments/comments/{postId}": {
+    "/api/users/{userId}/posts": {
       "get": {
         "tags": [],
         "description": "",
         "parameters": [
           {
-            "name": "postId",
+            "name": "userId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -130,17 +142,53 @@
           "200": {
             "description": "OK"
           },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
           "401": {
             "description": "Unauthorized"
           }
         }
-      },
+      }
+    },
+    "/api/users/{userId}": {
       "post": {
         "tags": [],
         "description": "",
         "parameters": [
           {
-            "name": "postId",
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "put": {
+        "tags": [],
+        "description": "",
+        "parameters": [
+          {
+            "name": "userId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -156,7 +204,19 @@
             "schema": {
               "type": "object",
               "properties": {
-                "content": {
+                "nickname": {
+                  "example": "any"
+                },
+                "userName": {
+                  "example": "any"
+                },
+                "imageUrl_profile": {
+                  "example": "any"
+                },
+                "introduce": {
+                  "example": "any"
+                },
+                "phoneNumber": {
                   "example": "any"
                 }
               }
@@ -164,35 +224,11 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           },
-          "401": {
-            "description": "Unauthorized"
-          }
-        }
-      }
-    },
-    "/api/comments/comments/{commentId}": {
-      "delete": {
-        "tags": [],
-        "description": "",
-        "parameters": [
-          {
-            "name": "commentId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
+          "400": {
+            "description": "Bad Request"
           },
           "401": {
             "description": "Unauthorized"

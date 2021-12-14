@@ -71,17 +71,40 @@ router.get('/me', authMiddleware, async (req, res) => {
         where: { userId },
     });
 
-    // 유저 가입일
-    let temp = String(userInfo.createdAt);
-    // let dateComponents = temp.split('T');
-    // let datePieces = dateComponents[0].split("-");
-    // let timePieces = dateComponents[1].split(":");
-    // userInfo.createdAt = new Date(datePieces[2], (datePieces[1] - 1), datePieces[0],
-    //                      timePieces[0], timePieces[1], timePieces[2])
-    console.log(userInfo.createdAt);
+    let {
+        userIds,
+        userEmail,
+        userName,
+        nickname,
+        imageUrl_profile,
+        introduce,
+        phoneNumber,
+        createdAt,
+    } = userInfo;
+
+    let tempTime =
+        createdAt.getFullYear() +
+        '-' +
+        ('0' + (createdAt.getMonth() + 1)).slice(-2) +
+        '-' +
+        ('0' + createdAt.getDate()).slice(-2) +
+        ' ' +
+        ('0' + createdAt.getHours()).slice(-2) +
+        ':' +
+        ('0' + createdAt.getMinutes()).slice(-2) +
+        ':' +
+        ('0' + createdAt.getSeconds()).slice(-2);
+
     res.send({
         // default 200
-        userInfo,
+        userIds,
+        userEmail,
+        userName,
+        nickname,
+        imageUrl_profile,
+        introduce,
+        phoneNumber,
+        createdAt,
     });
 });
 
@@ -101,6 +124,7 @@ router.get('/:userId/posts', authMiddleware, async (req, res) => {
         res.status(400).send(error);
     }
 });
+
 //프로필 이미지 업로드
 const upload = multer({ storage: storage }).single('img');
 router.post('/:userId', authMiddleware, async (req, res) => {
@@ -120,6 +144,7 @@ router.post('/:userId', authMiddleware, async (req, res) => {
         res.status(400).send(error);
     }
 });
+
 //마이페이지/내 정보 수정
 router.put('/:userId', authMiddleware, async (req, res) => {
     const { nickname, userName, imageUrl_profile, introduce, phoneNumber } =
