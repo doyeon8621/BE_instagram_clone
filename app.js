@@ -33,14 +33,18 @@ app.use(express.json());
 
 
 
-app.use('/api/posts', express.urlencoded({ extended: false }), postsRouter);
-app.use('/api/users', express.urlencoded({ extended: false }), userRouter);
-app.use('/api/comments', express.urlencoded({ extended: false }), commentRouter);
 //route
 const postsRouter = require('./routers/posts');
 const userRouter = require('./routers/users');
 const commentRouter = require('./routers/comments');
 
+//app.use('/api/posts', express.urlencoded({ extended: false }), postsRouter);
+app.use('/api/users', express.urlencoded({ extended: false }), userRouter);
+//app.use('/api/comments', express.urlencoded({ extended: false }), commentRouter);
+//테스트용
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/views/image.html");
+});
 app.listen(port, () => {
   console.log(`listening at http://localhost:${port}`);
 });
