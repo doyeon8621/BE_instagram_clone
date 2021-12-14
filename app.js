@@ -38,7 +38,7 @@ const commentRouter = require('./routers/comments');
 
 //route
 
-//app.use('/api/posts', express.urlencoded({ extended: false }), postsRouter);
+app.use('/api/posts', express.urlencoded({ extended: false }), postsRouter);
 app.use('/api/users', express.urlencoded({ extended: false }), userRouter);
 //app.use('/api/comments', express.urlencoded({ extended: false }), commentRouter);
 //테스트용
