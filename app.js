@@ -25,7 +25,7 @@ sequelize.sync({force:false})
     console.log(err);
   });
   
-// const postsRouter = require('./routers/posts');
+const postsRouter = require('./routers/posts');
 // const userRouter = require('./routers/user');
 // const commentRouter = require('./routers/comment');
 
@@ -34,7 +34,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static('public'));
 app.use(express.json());
 
-// app.use('/api', express.urlencoded({ extended: false }), postsRouter);
+app.use('/api/posts', express.urlencoded({ extended: false }), postsRouter);
 // app.use('/api', express.urlencoded({ extended: false }), userRouter);
 // app.use('/api', express.urlencoded({ extended: false }), commentRouter);
 
