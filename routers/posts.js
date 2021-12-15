@@ -27,6 +27,7 @@ function date_formmatter(format) {
 }
 //전체 게시글 조회
 router.get("/", verify, async(req, res, next) => {
+    
     let posts =[];
     let postsInfos = {};
     try{
@@ -40,7 +41,7 @@ router.get("/", verify, async(req, res, next) => {
         const posts_temp = await Posts.findAll({
             include: [
                 {model:Users,
-                attributes: ['nickname']}
+                attributes: ['nickname','imageUrl_profile']}
             ],
             order:[['postId','DESC']]});
 
@@ -48,6 +49,12 @@ router.get("/", verify, async(req, res, next) => {
         const {postId, content, User, imageUrl, createdAt, userID} = posts_temp[i];
         //console.log(`이것이 ${postId} 글의 기본 구조다: `+postId, content, User['nickname'], imageUrl, createdAt)
         const likes = await Likes.findAll({ where:{ postId: postId}});
+        //로그인한 유저가 좋아요한 글인지 표시
+        const isMyLike = await Likes.findOne({where:{postID: postId, userID:userId}});
+        let myLike = false;
+        if(isMyLike){
+            myLike = true;
+        }
         
         let createdAt_temp = date_formmatter(new Date(createdAt));
         postsInfos['postId'] = postId;
@@ -57,7 +64,9 @@ router.get("/", verify, async(req, res, next) => {
         postsInfos['nickname'] = User['nickname'];
         postsInfos['imageUrl'] = imageUrl;
         postsInfos['createdAt'] = createdAt_temp;
-        
+        postsInfos['imageUrl_profile'] = User['imageUrl_profile'];
+        postsInfos['myLike'] = myLike;
+
         posts.push(postsInfos);
         //배열에 마지막 값만 들어가지 않도록 초기화 
         postsInfos = {};
@@ -85,7 +94,7 @@ router.get("/:postId", verify, async(req,res) => {
         const post_temp = await Posts.findOne({ 
             include: [
             {model:Users,
-            attributes: ['nickname']}
+            attributes: ['nickname','imageUrl_profile']}
             ],
         where:{ postId: postId}
         });
@@ -96,15 +105,24 @@ router.get("/:postId", verify, async(req,res) => {
             return;
         }
         const {content, User, imageUrl, createdAt, userID} = post_temp;
+        const likes = await Likes.findAll({ where:{ postId: postId}});
+        //로그인한 유저가 좋아요한 글인지 표시
+        const isMyLike = await Likes.findOne({where:{postID: postId, userID:userId}});
+        let myLike = false;
+        if(isMyLike){
+            myLike = true;
+        }
 
         let createdAt_temp = date_formmatter(new Date(createdAt));
             posts['postId'] = postId * 1;
             posts['userId'] = userID;
             posts['content'] = content;
+            posts['likeCount'] = likes.length;
             posts['nickname'] = User['nickname'];
             posts['imageUrl'] =imageUrl;
             posts['createdAt'] = createdAt_temp;
-
+            posts['imageUrl_profile'] = User['imageUrl_profile'];
+            posts['myLike'] = myLike;
             res.send(posts);
         
     }catch(err){
