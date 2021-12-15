@@ -23,8 +23,8 @@ router.post('/', async (req, res) => {
             userName,
             nickname,
             password 
-        } = postUsersSchema.validateAsync(req.body);
-        
+        } = await postUsersSchema.validateAsync(req.body);
+
         const existUsers = await User.findAll({
             where: {
                 [Op.or]: [{ userEmail }, { nickname }], // 둘중 하나라도 맞으면 가져오기
