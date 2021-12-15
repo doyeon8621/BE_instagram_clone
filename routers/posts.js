@@ -95,10 +95,11 @@ router.get("/:postId", verify, async(req,res) => {
             res.status(404).send({});
             return;
         }
-        const {content, User, imageUrl, createdAt} = post_temp;
+        const {content, User, imageUrl, createdAt, userID} = post_temp;
 
         let createdAt_temp = date_formmatter(new Date(createdAt));
-
+            posts['postId'] = postId * 1;
+            posts['userId'] = userID;
             posts['content'] = content;
             posts['nickname'] = User['nickname'];
             posts['imageUrl'] =imageUrl;
