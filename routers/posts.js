@@ -1,5 +1,7 @@
 const express = require("express");
 const {Op} = require("sequelize");
+const multer = require("multer");
+const path = require("path");
 const Posts = require("../models/posts");
 const Users = require("../models/users");
 const Likes = require("../models/likes");
@@ -31,7 +33,7 @@ router.get("/", verify, async(req, res, next) => {
         //로그인이 되지 않았을 경우 (거의 미들웨어에서 거름)
         const { userId } = res.locals.user;
         if (!userId) {
-            res.status(401).send(err);
+            res.status(401).send();
             return;
         }
         //최신글 순으로 정렬되었다.
@@ -116,7 +118,7 @@ router.delete('/:postId', verify, async (req, res) =>{
     const {userId} = res.locals.user;
     //로그인이 되지 않았을 경우 (거의 미들웨어에서 거름)
     if (!userId) {
-        res.status(401).send(err);
+        res.status(401).send();
         return;
     }
     const postOne = await Posts.findByPk(postId);
@@ -125,7 +127,7 @@ router.delete('/:postId', verify, async (req, res) =>{
         const {userID} = postOne;
         //로그인했지만 권한 없음 (작성자 본인 아님)
         if(userId !== userID){
-            res.status(403).send(err);
+            res.status(403).send();
             return;
         }
             await postOne.destroy();
@@ -146,7 +148,7 @@ router.post("/:postId/like", verify, async(req, res) => {
         const {postId} = req.params;
         //로그인이 되지 않았을 경우 (거의 미들웨어에서 거름)
         if (!userId) {
-            res.status(401).send(err);
+            res.status(401).send();
             return;
         }
         const postOne = await Posts.findOne({
@@ -154,7 +156,7 @@ router.post("/:postId/like", verify, async(req, res) => {
         });
         //해당 게시글 없음
         if(!postOne){
-            res.status(404).send(err);
+            res.status(404).send();
             return;
         }
         const likeOne = await Likes.findOne({
@@ -201,5 +203,33 @@ router.post("/", verify, async(req, res) =>{
     }
 });
 
+//게시글 이미지업로드
+const upload = multer({
+    storage: multer.diskStorage({
+        destination: function(req, file, cb){
+            cb(null, 'uploads/posts');
+        },
+        filename: function(req, file, cb){
+            cb(null, new Date().valueOf() + "_" + file.originalname);
+        },
+    }),
+});
+
+router.post("/images", upload.single('img'), (req, res) =>{
+    try{
+        const {filename, path, originalname} = req.file;
+        //업로드 파일 확장자 허용 범위
+        let ext = originalname.slice(-4);
+        if (ext !== '.gif' && ext !== '.png' && ext !=='.jpg' && ext !== 'jpeg' ) {
+            res.status(400).send({error: "파일 형식을 확인하세요."});
+            return;
+        };
+        res.status(201).send({url: path, fileName: filename});
+
+    }catch(err){
+        res.status(400).send(err);
+    }
+    
+})
 
 module.exports = router;
