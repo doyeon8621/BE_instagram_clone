@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Comments = require('../models/comments');
 const authMiddleware = require('../middlewares/auth-middleware');
+const { User } = require('../models');
 
 //날짜 가공용
 function date_formmatter(format) {
@@ -32,14 +33,18 @@ router.get('/:postId', authMiddleware, async (req, res) => {
             where: { postId },
         });
         for (let i = 0; i < tempComments.length; i++) {
-            const { postID, commentId, content, userID, createdAt } =
+            const { commentId, content, userID, createdAt } =
                 tempComments[i];
 
+            let userTemp = await User.findOne({
+                attributes: ['nickname'],
+                where: { userID },
+            });
+
             let createdAt_temp = date_formmatter(new Date(createdAt));
-            commentsInfos['postID'] = postID;
+            commentsInfos['nickname'] = userTemp.nickname;
             commentsInfos['commentId'] = commentId;
             commentsInfos['content'] = content;
-            commentsInfos['userID'] = userID;
             commentsInfos['createdAt'] = createdAt_temp;
 
             comments.push(commentsInfos);
