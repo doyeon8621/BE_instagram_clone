@@ -157,39 +157,87 @@ router.post('/:userId', async (req, res) => {
     }
 });
 
-//마이페이지/내 정보 수정
+// 마이페이지내 정보 수정
 router.put('/:userId', authMiddleware, async (req, res) => {
     const { nickname, userName, imageUrl_profile, introduce, phoneNumber } =
         req.body;
     const { userId } = res.locals.user;
     try {
         const existNickname = await User.findOne({
-            where: { nickname: nickname },
+            attributes:['nickname'],
+            where: { userId: userId },
         });
-        if (existNickname.length) {
-            res.status(400).send({
-                message: '사용중인 닉네임 입니다',
-            });
-        } else if (nickname == '') {
-            res.status(400).send({});
-        } else if (userName == '') {
-            res.status(400).send({});
-        }
-        await User.update(
-            {
-                nickname: nickname,
-                userName: userName,
-                imageUrl_profile: imageUrl_profile,
-                introduce: introduce,
-                phoneNumber: phoneNumber,
-            },
-            {
-                where: { userId: userId },
+        console.log(existNickname.nickname)
+        if (existNickname.nickname !== nickname) {  //0이면 false로 실행안됨
+            const newNickname = await User.findAll({
+                attributes:['nickname'],
+                where:{nickname:nickname}
+            })
+            if(newNickname.length){
+                res.status(400).send({
+                    message: '사용중인 닉네임 입니다',
+                });
+                return;
             }
-        );
+        }
+        if (nickname == '') {
+            res.status(400).send({});
+            return;
+        }
+        if (userName == ''){
+            res.status(400).send({});
+            return;
+        }
+            await User.update(
+                {
+                    nickname: nickname,
+                    userName: userName,
+                    imageUrl_profile: imageUrl_profile,
+                    introduce: introduce,
+                    phoneNumber: phoneNumber,
+                },
+                {
+                    where: { userId: userId },
+                }
+            );
         res.status(204).send({});
     } catch (error) {
-        res.status(400).send({});
+        res.status(400).send({error});
+    }
+});
+
+// 다른 유저 페이지
+router.get('/posts/:userId', authMiddleware, async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const users = await User.findOne({
+            attributes: [
+                'userId',
+                'userEmail',
+                'userName',
+                'nickname',
+                'imageUrl_profile',
+                'introduce',
+                'phoneNumber',
+            ],
+            where: { userId },
+        });
+        const posts = await Post.findAll({
+            order: [['postID', 'DESC']], // 내림차순으로 정렬
+            where: { userId },
+        });
+        if (posts.length == 0) {
+            res.status(204).send({});
+        } else {
+            res.status(200).send({ 
+                users, 
+                posts 
+            });
+        }
+    } catch (err) {
+        res.status(400).send({
+            errorMessage: 'Error : ' + err,
+        });
     }
 });
 
