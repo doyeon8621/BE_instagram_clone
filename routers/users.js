@@ -2,7 +2,7 @@ const express = require('express');
 const { Op } = require('sequelize');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
-const { Post, User } = require('../models');
+const { Post, User, Like } = require('../models');
 const upload = require('../middlewares/uploade');
 const authMiddleware = require('../middlewares/auth-middleware');
 const Joi = require('joi');
@@ -14,15 +14,29 @@ const postUsersSchema = Joi.object({
     password: Joi.string().min(4).max(12).required(),
 });
 
+//날짜 가공용
+function date_formmatter(format) {
+    let year = format.getFullYear();
+    let month = format.getMonth() + 1;
+    let date = format.getDate();
+    let hour = format.getHours();
+    let min = format.getMinutes();
+    let sec = format.getSeconds();
+
+    if (month < 10) month = '0' + month;
+    if (date < 10) date = '0' + date;
+    if (hour < 10) hour = '0' + hour;
+    if (min < 10) min = '0' + min;
+    if (sec < 10) sec = '0' + sec;
+
+    return `${year}-${month}-${date} ${hour}:${min}:${sec}`;
+}
+
 // 회원가입
 router.post('/', async (req, res) => {
     try {
-        const {
-            userEmail,
-            userName,
-            nickname,
-            password 
-        } = await postUsersSchema.validateAsync(req.body);
+        const { userEmail, userName, nickname, password } =
+            await postUsersSchema.validateAsync(req.body);
 
         const existUsers = await User.findAll({
             where: {
@@ -138,11 +152,11 @@ router.get('/:userId/posts', authMiddleware, async (req, res) => {
 
 //프로필 이미지 업로드
 
-router.post('/:userId',upload.single('img'),(req, res) => {
-    const {filename, path, originalname} = req.file;
-    try{
-        res.status(201).send({url: path, fileName: filename});
-    }catch(err){
+router.post('/:userId', upload.single('img'), (req, res) => {
+    const { filename, path, originalname } = req.file;
+    try {
+        res.status(201).send({ url: path, fileName: filename });
+    } catch (err) {
         res.status(400).send(err);
     }
 });
@@ -154,16 +168,17 @@ router.put('/:userId', authMiddleware, async (req, res) => {
     const { userId } = res.locals.user;
     try {
         const existNickname = await User.findOne({
-            attributes:['nickname'],
+            attributes: ['nickname'],
             where: { userId: userId },
         });
-        console.log(existNickname.nickname)
-        if (existNickname.nickname !== nickname) {  //0이면 false로 실행안됨
+        console.log(existNickname.nickname);
+        if (existNickname.nickname !== nickname) {
+            //0이면 false로 실행안됨
             const newNickname = await User.findAll({
-                attributes:['nickname'],
-                where:{nickname:nickname}
-            })
-            if(newNickname.length){
+                attributes: ['nickname'],
+                where: { nickname: nickname },
+            });
+            if (newNickname.length) {
                 res.status(400).send({
                     message: '사용중인 닉네임 입니다',
                 });
@@ -174,31 +189,33 @@ router.put('/:userId', authMiddleware, async (req, res) => {
             res.status(400).send({});
             return;
         }
-        if (userName == ''){
+        if (userName == '') {
             res.status(400).send({});
             return;
         }
-            await User.update(
-                {
-                    nickname: nickname,
-                    userName: userName,
-                    imageUrl_profile: imageUrl_profile,
-                    introduce: introduce,
-                    phoneNumber: phoneNumber,
-                },
-                {
-                    where: { userId: userId },
-                }
-            );
+        await User.update(
+            {
+                nickname: nickname,
+                userName: userName,
+                imageUrl_profile: imageUrl_profile,
+                introduce: introduce,
+                phoneNumber: phoneNumber,
+            },
+            {
+                where: { userId: userId },
+            }
+        );
         res.status(204).send({});
     } catch (error) {
-        res.status(400).send({error});
+        res.status(400).send({ error });
     }
 });
 
 // 다른 유저 페이지
 router.get('/posts/:userId', authMiddleware, async (req, res) => {
     const { userId } = req.params;
+    let posts = [];
+    let postsInfos = {};
     try {
         const users = await User.findOne({
             attributes: [
@@ -210,20 +227,33 @@ router.get('/posts/:userId', authMiddleware, async (req, res) => {
                 'introduce',
                 'phoneNumber',
             ],
-            where: { userId },
+            where: { userId: userId },
         });
-        const posts = await Post.findAll({
-            order: [['postID', 'DESC']], // 내림차순으로 정렬
-            where: { userId },
+
+        const posts_temp = await Post.findAll({
+            order: [['postId', 'DESC']], // 내림차순으로 정렬
+            where: { userID: userId },
         });
-        if (posts.length == 0) {
-            res.status(204).send({});
-        } else {
-            res.status(200).send({ 
-                users, 
-                posts 
-            });
+        for (let i = 0; i < posts_temp.length; i++) {
+            const { postId, content, imageUrl, createdAt } = posts_temp[i];
+
+            const likes = await Like.findAll({ where: { postId: postId } });
+
+            let createdAt_temp = date_formmatter(new Date(createdAt));
+            postsInfos['postId'] = postId;
+            postsInfos['content'] = content;
+            postsInfos['likeCount'] = likes.length;
+            postsInfos['imageUrl'] = imageUrl;
+            postsInfos['createdAt'] = createdAt_temp;
+
+            posts.push(postsInfos);
+
+            postsInfos = {};
         }
+        res.status(200).send({
+            users,
+            posts,
+        });
     } catch (err) {
         res.status(400).send({
             errorMessage: 'Error : ' + err,
