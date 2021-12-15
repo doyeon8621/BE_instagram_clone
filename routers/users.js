@@ -3,8 +3,7 @@ const { Op } = require('sequelize');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 const { Post, User } = require('../models');
-const multer = require('multer');
-const storage = require('../middlewares/uploade');
+const upload = require('../middlewares/uploade');
 const authMiddleware = require('../middlewares/auth-middleware');
 const Joi = require('joi');
 
@@ -138,22 +137,13 @@ router.get('/:userId/posts', authMiddleware, async (req, res) => {
 });
 
 //프로필 이미지 업로드
-const upload = multer({ storage: storage }).single('img');
-router.post('/:userId', async (req, res) => {
-    try {
-        upload(req, res, (err) => {
-            if (err) {
-                return res.status(400);
-            } else {
-                return res.status(201).send({
-                    //성공하면 파일경로, 파일 이름 클라이언트로
-                    url: res.req.file.path, //path랑
-                    fileName: res.req.file.filename, //filename
-                });
-            }
-        });
-    } catch (error) {
-        res.status(400).send(error);
+
+router.post('/:userId',upload.single('img'),(req, res) => {
+    const {filename, path, originalname} = req.file;
+    try{
+        res.status(201).send({url: path, fileName: filename});
+    }catch(err){
+        res.status(400).send(err);
     }
 });
 

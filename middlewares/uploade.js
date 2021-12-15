@@ -1,21 +1,23 @@
 const multer = require('multer');
 
 const storage = multer.diskStorage({
-    destination: (req, file, fn) => {
-        fn(null, 'uploads/profiles');
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/profiles');
     },
-    filename: (req, file, fn) => {
-        fn(null, `${Date.now()}_${file.originalname}`);
-    },
-    fileFilter: (req, file, fn) => {
-        const ext = path.extname(file.originalname);
-        if (ext !== '.gif' || ext !== '.png') {
-            return fn(
-                res.status(400).end('파일 업로드중 오류가 발생 했습니다.'),
-                false
-            );
-        }
-        fn(null, true);
-    },
+    filename: (req, file, cb) => {
+        cb(null, `${Date.now()}_${file.originalname}`);
+    }
 });
-module.exports = storage;
+const fileFilter = (req, file, cb)=>{
+    if (file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/jpeg"|| file.mimetype == "image/gif") {
+        cb(null, true);
+      } else {
+        cb(null, false);
+        return cb(new Error(' .png, .jpg ,.jpeg and .gif 파일만 업로드 가능합니다.'));
+      }
+    }
+module.exports = multer({
+    storage:storage,
+    fileFilter:fileFilter,
+    limits:{fileSize:5*1024*1024},
+});
