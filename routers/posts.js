@@ -26,6 +26,7 @@ function date_formmatter(format) {
     return `${year}-${month}-${date} ${hour}:${min}:${sec}`;
 }
 //전체 게시글 조회
+
 router.get('/', verify, async (req, res, next) => {
     let posts = [];
     let postsInfos = {};
@@ -38,30 +39,39 @@ router.get('/', verify, async (req, res, next) => {
         }
         //최신글 순으로 정렬되었다.
         const posts_temp = await Posts.findAll({
-            include: [{ model: Users, attributes: ['nickname'] }],
-            order: [['postId', 'DESC']],
-        });
+            include: [
+                {model:Users,
+                attributes: ['nickname','imageUrl_profile']}
+            ],
+            order:[['postId','DESC']]});
 
-        for (let i = 0; i < posts_temp.length; i++) {
-            const { postId, content, User, imageUrl, createdAt, userID } =
-                posts_temp[i];
-            //console.log(`이것이 ${postId} 글의 기본 구조다: `+postId, content, User['nickname'], imageUrl, createdAt)
-            const likes = await Likes.findAll({ where: { postId: postId } });
-
-            let createdAt_temp = date_formmatter(new Date(createdAt));
-            postsInfos['postId'] = postId;
-            postsInfos['userId'] = userID;
-            postsInfos['content'] = content;
-            postsInfos['likeCount'] = likes.length;
-            postsInfos['nickname'] = User['nickname'];
-            postsInfos['imageUrl'] = imageUrl;
-            postsInfos['createdAt'] = createdAt_temp;
-
-            posts.push(postsInfos);
-            //배열에 마지막 값만 들어가지 않도록 초기화
-            postsInfos = {};
+    for(let i =0;i<posts_temp.length; i++){
+        const {postId, content, User, imageUrl, createdAt, userID} = posts_temp[i];
+        //console.log(`이것이 ${postId} 글의 기본 구조다: `+postId, content, User['nickname'], imageUrl, createdAt)
+        const likes = await Likes.findAll({ where:{ postId: postId}});
+        //로그인한 유저가 좋아요한 글인지 표시
+        const isMyLike = await Likes.findOne({where:{postID: postId, userID:userId}});
+        let myLike = false;
+        if(isMyLike){
+            myLike = true;
         }
-        res.json({ posts: posts });
+        
+        let createdAt_temp = date_formmatter(new Date(createdAt));
+        postsInfos['postId'] = postId;
+        postsInfos['userId'] = userID;
+        postsInfos['content'] = content;
+        postsInfos['likeCount'] = likes.length;
+        postsInfos['nickname'] = User['nickname'];
+        postsInfos['imageUrl'] = imageUrl;
+        postsInfos['createdAt'] = createdAt_temp;
+        postsInfos['imageUrl_profile'] = User['imageUrl_profile'];
+        postsInfos['myLike'] = myLike;
+
+        posts.push(postsInfos);
+        //배열에 마지막 값만 들어가지 않도록 초기화 
+        postsInfos = {};
+    }
+    res.json({posts:posts});
     } catch (err) {
         res.status(400).send(err);
         next(err);
@@ -80,9 +90,12 @@ router.get('/:postId', verify, async (req, res) => {
             res.status(401).send({});
             return;
         }
-        const post_temp = await Posts.findOne({
-            include: [{ model: Users, attributes: ['nickname'] }],
-            where: { postId: postId },
+        const post_temp = await Posts.findOne({ 
+            include: [
+            {model:Users,
+            attributes: ['nickname','imageUrl_profile']}
+            ],
+        where:{ postId: postId}
         });
 
         //요청한 리소스를 찾을 수 없다
@@ -90,18 +103,28 @@ router.get('/:postId', verify, async (req, res) => {
             res.status(404).send({});
             return;
         }
-        const { content, User, imageUrl, createdAt, userID } = post_temp;
+        const {content, User, imageUrl, createdAt, userID} = post_temp;
+        const likes = await Likes.findAll({ where:{ postId: postId}});
+        //로그인한 유저가 좋아요한 글인지 표시
+        const isMyLike = await Likes.findOne({where:{postID: postId, userID:userId}});
+        let myLike = false;
+        if(isMyLike){
+            myLike = true;
+        }
 
         let createdAt_temp = date_formmatter(new Date(createdAt));
-        posts['postId'] = postId * 1;
-        posts['userId'] = userID;
-        posts['content'] = content;
-        posts['nickname'] = User['nickname'];
-        posts['imageUrl'] = imageUrl;
-        posts['createdAt'] = createdAt_temp;
-
-        res.send(posts);
-    } catch (err) {
+            posts['postId'] = postId * 1;
+            posts['userId'] = userID;
+            posts['content'] = content;
+            posts['likeCount'] = likes.length;
+            posts['nickname'] = User['nickname'];
+            posts['imageUrl'] =imageUrl;
+            posts['createdAt'] = createdAt_temp;
+            posts['imageUrl_profile'] = User['imageUrl_profile'];
+            posts['myLike'] = myLike;
+            res.send(posts);
+        
+    }catch(err){
         res.status(400).send(err);
     }
 });
