@@ -28,7 +28,7 @@ router.get('/:postId', authMiddleware, async (req, res) => {
     let commentsInfos = {};
     try {
         const tempComments = await Comments.findAll({
-            order: [['postID', 'DESC']], // 내림차순으로 정렬
+            order: [['commentId', 'DESC']], // 내림차순으로 정렬
             where: { postId },
         });
         for(let i =0;i<tempComments.length; i++){
@@ -58,7 +58,7 @@ router.post('/:postId', authMiddleware, async (req, res) => {
     const { content } = req.body;
     const { userId } = res.locals.user;
     try {
-        await Comments.create({ postId, userId, content });
+        await Comments.create({ postID:postId, userID:userId, content:content });
         res.status(201).send({});
     } catch (err) {
         res.status(400).send({
@@ -74,8 +74,8 @@ router.delete('/:commentId', authMiddleware, async (req, res) => {
     try {
         const existsComment = await Comments.findOne({
             where: {
-                userId,
-                commentId,
+                userID:userId,
+                commentId:commentId,
             },
         });
 

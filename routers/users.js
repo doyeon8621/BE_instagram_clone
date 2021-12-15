@@ -210,20 +210,18 @@ router.get('/posts/:userId', authMiddleware, async (req, res) => {
                 'introduce',
                 'phoneNumber',
             ],
-            where: { userId },
+            where: { userId:userId },
         });
         const posts = await Post.findAll({
             order: [['postID', 'DESC']], // 내림차순으로 정렬
-            where: { userId },
+            where: { userID:userId },
         });
-        if (posts.length == 0) {
-            res.status(204).send({});
-        } else {
+        
             res.status(200).send({ 
                 users, 
                 posts 
             });
-        }
+        
     } catch (err) {
         res.status(400).send({
             errorMessage: 'Error : ' + err,
