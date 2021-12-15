@@ -6,6 +6,23 @@ const Likes = require("../models/likes");
 const verify = require('../middlewares/auth-middleware');
 const router = express.Router();
 
+//날짜 가공용
+function date_formmatter(format) {
+    let year = format.getFullYear();
+    let month = format.getMonth() + 1;
+    let date = format.getDate();
+    let hour = format.getHours();
+    let min = format.getMinutes();
+    let sec = format.getSeconds();
+
+    if (month < 10) month = '0' + month;
+    if (date < 10) date = '0' + date;
+    if (hour < 10) hour = '0' + hour;
+    if (min < 10) min = '0' + min;
+    if (sec < 10) sec = '0' + sec;
+
+    return `${year}-${month}-${date} ${hour}:${min}:${sec}`;
+}
 //전체 게시글 조회
 router.get("/", verify, async(req, res, next) => {
     let posts =[];
@@ -14,7 +31,7 @@ router.get("/", verify, async(req, res, next) => {
         //로그인이 되지 않았을 경우 (거의 미들웨어에서 거름)
         const { userId } = res.locals.user;
         if (!userId) {
-            res.status(401).send({});
+            res.status(401).send(err);
             return;
         }
         //최신글 순으로 정렬되었다.
@@ -30,7 +47,7 @@ router.get("/", verify, async(req, res, next) => {
         //console.log(`이것이 ${postId} 글의 기본 구조다: `+postId, content, User['nickname'], imageUrl, createdAt)
         const likes = await Likes.findAll({ where:{ postId: postId}});
         
-        let createdAt_temp = new Date(createdAt).toISOString().replace("T"," ").slice(0,19);
+        let createdAt_temp = date_formmatter(new Date(createdAt));
         postsInfos['postId'] = postId;
         postsInfos['content'] = content;
         postsInfos['likeCount'] = likes.length;
@@ -45,7 +62,7 @@ router.get("/", verify, async(req, res, next) => {
     res.json({posts:posts});
 
     }catch(err){
-        res.status(400).send({});
+        res.status(400).send(err);
         next(err);
     }
 });
@@ -77,7 +94,7 @@ router.get("/:postId", verify, async(req,res) => {
         }
         const {content, User, imageUrl, createdAt} = post_temp;
 
-        let createdAt_temp = new Date(createdAt).toISOString().replace("T"," ").slice(0,19);
+        let createdAt_temp = date_formmatter(new Date(createdAt));
 
             posts['content'] = content;
             posts['nickname'] = User['nickname'];
@@ -87,7 +104,7 @@ router.get("/:postId", verify, async(req,res) => {
             res.send(posts);
         
     }catch(err){
-        res.status(400).send({});
+        res.status(400).send(err);
     }
 });
 
@@ -99,7 +116,7 @@ router.delete('/:postId', verify, async (req, res) =>{
     const {userId} = res.locals.user;
     //로그인이 되지 않았을 경우 (거의 미들웨어에서 거름)
     if (!userId) {
-        res.status(401).send({});
+        res.status(401).send(err);
         return;
     }
     const postOne = await Posts.findByPk(postId);
@@ -108,7 +125,7 @@ router.delete('/:postId', verify, async (req, res) =>{
         const {userID} = postOne;
         //로그인했지만 권한 없음 (작성자 본인 아님)
         if(userId !== userID){
-            res.status(403).send({});
+            res.status(403).send(err);
             return;
         }
             await postOne.destroy();
@@ -116,7 +133,7 @@ router.delete('/:postId', verify, async (req, res) =>{
     res.status(204).send({});
 
     }catch(err){
-        res.status(400).send({});
+        res.status(400).send(err);
         console.log(err)
     }
 });
@@ -129,25 +146,60 @@ router.post("/:postId/like", verify, async(req, res) => {
         const {postId} = req.params;
         //로그인이 되지 않았을 경우 (거의 미들웨어에서 거름)
         if (!userId) {
-            res.status(401).send({});
+            res.status(401).send(err);
             return;
         }
-        const postOne = await Likes.findOne({
+        const postOne = await Posts.findOne({
+            where:{  postId: postId},
+        });
+        //해당 게시글 없음
+        if(!postOne){
+            res.status(404).send(err);
+            return;
+        }
+        const likeOne = await Likes.findOne({
             where:{ userID: userId, postID: postId},
         });
 
-        if(postOne){
-            await postOne.destroy();
+        if(likeOne){
+            //좋아요 취소
+            await likeOne.destroy();
             res.status(204).send({});
         }else{
+            //좋아요 
             await Likes.create({
                 userID: userId, postID: postId
             })
             res.status(201).send({});
         }
     }catch(err){
-        res.status(400).send({});
+        res.status(400).send(err);
     }
 });
+
+//게시글 작성
+router.post("/", verify, async(req, res) =>{
+    try{
+        const { userId } = res.locals.user;
+        //로그인이 되지 않았을 경우 (거의 미들웨어에서 거름)
+        if (!userId) {
+            res.status(401).send({});
+            return;
+        }else{
+        const {imageUrl, content} = req.body;
+        const today = date_formmatter(new Date());
+        await Posts.create({
+            imageUrl: imageUrl,
+            content: content,
+            userID: userId,
+            createdAt: today
+        })
+        res.status(201).send({});
+        }
+    }catch(err){
+        res.status(400).send(err);
+    }
+});
+
 
 module.exports = router;
