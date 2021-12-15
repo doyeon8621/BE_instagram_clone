@@ -38,7 +38,11 @@ const commentRouter = require('./routers/comments');
 
 app.use('/api/posts', express.urlencoded({ extended: false }), postsRouter);
 app.use('/api/users', express.urlencoded({ extended: false }), userRouter);
-app.use('/api/comments', express.urlencoded({ extended: false }), commentRouter);
+app.use(
+    '/api/comments',
+    express.urlencoded({ extended: false }),
+    commentRouter
+);
 //테스트용
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/views/image.html');
