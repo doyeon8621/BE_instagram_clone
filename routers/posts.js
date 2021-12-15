@@ -42,15 +42,16 @@ router.get("/", verify, async(req, res, next) => {
                 {model:Users,
                 attributes: ['nickname']}
             ],
-            order:[['createdAt','DESC']]});
+            order:[['postId','DESC']]});
 
     for(let i =0;i<posts_temp.length; i++){
-        const {postId, content, User, imageUrl, createdAt} = posts_temp[i];
+        const {postId, content, User, imageUrl, createdAt, userID} = posts_temp[i];
         //console.log(`이것이 ${postId} 글의 기본 구조다: `+postId, content, User['nickname'], imageUrl, createdAt)
         const likes = await Likes.findAll({ where:{ postId: postId}});
         
         let createdAt_temp = date_formmatter(new Date(createdAt));
         postsInfos['postId'] = postId;
+        postsInfos['userId'] = userID;
         postsInfos['content'] = content;
         postsInfos['likeCount'] = likes.length;
         postsInfos['nickname'] = User['nickname'];
@@ -190,6 +191,11 @@ router.post("/", verify, async(req, res) =>{
         }else{
         const {imageUrl, content} = req.body;
         const today = date_formmatter(new Date());
+        //이미지 없음
+        if(!imageUrl){
+            res.status(400).send();
+            return;
+        }
         await Posts.create({
             imageUrl: imageUrl,
             content: content,
@@ -212,7 +218,7 @@ const upload = multer({
         filename: function(req, file, cb){
             cb(null, new Date().valueOf() + "_" + file.originalname);
         },
-    }),
+    }), limits: { fileSize: 5 * 1024 * 1024 }
 });
 
 router.post("/images", upload.single('img'), (req, res) =>{
