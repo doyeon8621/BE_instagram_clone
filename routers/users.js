@@ -6,12 +6,25 @@ const { Post, User } = require('../models');
 const multer = require('multer');
 const storage = require('../middlewares/uploade');
 const authMiddleware = require('../middlewares/auth-middleware');
+const Joi = require('joi');
+
+const postUsersSchema = Joi.object({
+    userEmail: Joi.string().email().required(),
+    userName: Joi.string().min(2).max(10).required(),
+    nickname: Joi.string().min(2).max(10).required(),
+    password: Joi.string().min(4).max(12).required(),
+});
 
 // 회원가입
 router.post('/', async (req, res) => {
-    const { userEmail, userName, nickname, password } = req.body;
-
     try {
+        const {
+            userEmail,
+            userName,
+            nickname,
+            password 
+        } = postUsersSchema.validateAsync(req.body);
+        
         const existUsers = await User.findAll({
             where: {
                 [Op.or]: [{ userEmail }, { nickname }], // 둘중 하나라도 맞으면 가져오기
@@ -126,7 +139,7 @@ router.get('/:userId/posts', authMiddleware, async (req, res) => {
 
 //프로필 이미지 업로드
 const upload = multer({ storage: storage }).single('img');
-router.post('/:userId',  async (req, res) => {
+router.post('/:userId', async (req, res) => {
     try {
         upload(req, res, (err) => {
             if (err) {
@@ -159,7 +172,7 @@ router.put('/:userId', authMiddleware, async (req, res) => {
             });
         } else if (nickname == '') {
             res.status(400).send({});
-        } else if (userName == ''){
+        } else if (userName == '') {
             res.status(400).send({});
         }
         await User.update(
