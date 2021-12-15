@@ -55,11 +55,14 @@ router.get('/', verify, async (req, res, next) => {
         if(isMyLike){
             myLike = true;
         }
+        //게시물 댓글갯수
+        const comment = await Comment.findAll({where:{postID:postId}});
         
         let createdAt_temp = date_formmatter(new Date(createdAt));
         postsInfos['postId'] = postId;
         postsInfos['userId'] = userID;
         postsInfos['content'] = content;
+        postsInfos['commentCount']= comment.length;
         postsInfos['likeCount'] = likes.length;
         postsInfos['nickname'] = User['nickname'];
         postsInfos['imageUrl'] = imageUrl;
@@ -111,11 +114,14 @@ router.get('/:postId', verify, async (req, res) => {
         if(isMyLike){
             myLike = true;
         }
+        //게시물 댓글갯수
+        const comment = await Comment.findAll({where:{postID:postId}});
 
         let createdAt_temp = date_formmatter(new Date(createdAt));
             posts['postId'] = postId * 1;
             posts['userId'] = userID;
             posts['content'] = content;
+            postsInfos['commentCount']= comment.length;
             posts['likeCount'] = likes.length;
             posts['nickname'] = User['nickname'];
             posts['imageUrl'] =imageUrl;
