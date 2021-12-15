@@ -52,7 +52,7 @@ router.post('/', async (req, res) => {
         await User.create({ userEmail, userName, nickname, password });
         res.status(201).send({});
     } catch (err) {
-        res.status(401).send({
+        res.status(400).send({
             errorMessage: 'Error : ' + err,
         });
     }
@@ -73,7 +73,7 @@ router.post('/login', async (req, res) => {
         const token = jwt.sign({ userId: user.userId }, 'my-secret-key');
         res.send({ token });
     } catch (err) {
-        res.status(401).send({
+        res.status(400).send({
             errorMessage: 'Error : ' + err,
         });
     }
