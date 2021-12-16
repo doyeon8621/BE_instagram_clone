@@ -75,6 +75,7 @@ router.get('/', verify, async (req, res, next) => {
         //배열에 마지막 값만 들어가지 않도록 초기화 
         postsInfos = {};
     }
+    
     res.json({posts:posts});
     } catch (err) {
         res.status(400).send(err);

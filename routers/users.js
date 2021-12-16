@@ -214,10 +214,11 @@ router.put('/:userId', authMiddleware, async (req, res) => {
 // 다른 유저 페이지
 router.get('/posts/:userId', authMiddleware, async (req, res) => {
     const { userId } = req.params;
+    let users = {};
     let posts = [];
     let postsInfos = {};
     try {
-        const users = await User.findOne({
+        const users_temp = await User.findOne({
             attributes: [
                 'userId',
                 'userEmail',
@@ -230,6 +231,15 @@ router.get('/posts/:userId', authMiddleware, async (req, res) => {
             where: { userId: userId },
         });
 
+        const { userEmail, userName, nickname, imageUrl_profile, introduce, phoneNumber } = users_temp;
+        users['userId'] = userId;
+        users['userEmail'] = userEmail;
+        users['userName'] = userName;
+        users['nickname'] = nickname;
+        users['imageUrl_profile'] = imageUrl_profile;
+        users['introduce'] = introduce;
+        users['phoneNumber'] = phoneNumber;
+
         const posts_temp = await Post.findAll({
             order: [['postId', 'DESC']], // 내림차순으로 정렬
             where: { userID: userId },
@@ -237,7 +247,7 @@ router.get('/posts/:userId', authMiddleware, async (req, res) => {
         for (let i = 0; i < posts_temp.length; i++) {
             const { postId, content, imageUrl, createdAt } = posts_temp[i];
 
-            const likes = await Like.findAll({ where: { postId: postId } });
+            const likes = await Like.findAll({ where: { postID: postId } });
 
             let createdAt_temp = date_formmatter(new Date(createdAt));
             postsInfos['postId'] = postId;
@@ -250,6 +260,9 @@ router.get('/posts/:userId', authMiddleware, async (req, res) => {
 
             postsInfos = {};
         }
+
+        console.log(users)
+        console.log(posts)
         res.status(200).send({
             users,
             posts,

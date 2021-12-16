@@ -5,6 +5,7 @@
     "database": "nodejs",
     "host": "127.0.0.1",
     "dialect": "mysql",
+    "timezone":"+09:00",
     "operatorsAliases": false
   },
   "test": {
@@ -19,6 +20,7 @@
     "password": "1q2w3e4r",
     "database": "database_production",
     "host": "13.125.45.147",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "timezone":"+09:00"
   }
 }
