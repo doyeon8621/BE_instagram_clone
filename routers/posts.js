@@ -66,9 +66,9 @@ router.get('/', verify, async (req, res, next) => {
         postsInfos['commentCount']= comment.length;
         postsInfos['likeCount'] = likes.length;
         postsInfos['nickname'] = User['nickname'];
-        postsInfos['imageUrl'] = imageUrl;
+        postsInfos['imageUrl'] = 'http://13.125.45.147/'+imageUrl;
         postsInfos['createdAt'] = createdAt_temp;
-        postsInfos['imageUrl_profile'] = User['imageUrl_profile'];
+        postsInfos['imageUrl_profile'] = 'http://13.125.45.147/'+User['imageUrl_profile'];
         postsInfos['myLike'] = myLike;
 
         posts.push(postsInfos);
@@ -126,9 +126,9 @@ router.get('/:postId', verify, async (req, res) => {
             posts['commentCount']= comment.length;
             posts['likeCount'] = likes.length;
             posts['nickname'] = User['nickname'];
-            posts['imageUrl'] =imageUrl;
+            posts['imageUrl'] ='http://13.125.45.147/'+imageUrl;
             posts['createdAt'] = createdAt_temp;
-            posts['imageUrl_profile'] = User['imageUrl_profile'];
+            posts['imageUrl_profile'] = 'http://13.125.45.147/'+User['imageUrl_profile'];
             posts['myLike'] = myLike;
             res.send(posts);
         

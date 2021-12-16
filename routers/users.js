@@ -236,7 +236,7 @@ router.get('/posts/:userId', authMiddleware, async (req, res) => {
         users['userEmail'] = userEmail;
         users['userName'] = userName;
         users['nickname'] = nickname;
-        users['imageUrl_profile'] = imageUrl_profile;
+        users['imageUrl_profile'] = 'http://13.125.45.147/'+imageUrl_profile;
         users['introduce'] = introduce;
         users['phoneNumber'] = phoneNumber;
 
@@ -253,7 +253,7 @@ router.get('/posts/:userId', authMiddleware, async (req, res) => {
             postsInfos['postId'] = postId;
             postsInfos['content'] = content;
             postsInfos['likeCount'] = likes.length;
-            postsInfos['imageUrl'] = imageUrl;
+            postsInfos['imageUrl'] = 'http://13.125.45.147/'+imageUrl;
             postsInfos['createdAt'] = createdAt_temp;
 
             posts.push(postsInfos);
