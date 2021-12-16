@@ -5,6 +5,7 @@ const path = require('path');
 const Posts = require('../models/posts');
 const Users = require('../models/users');
 const Likes = require('../models/likes');
+const Comment = require('../models/comments');
 const verify = require('../middlewares/auth-middleware');
 const router = express.Router();
 
@@ -48,7 +49,7 @@ router.get('/', verify, async (req, res, next) => {
     for(let i =0;i<posts_temp.length; i++){
         const {postId, content, User, imageUrl, createdAt, userID} = posts_temp[i];
         //console.log(`이것이 ${postId} 글의 기본 구조다: `+postId, content, User['nickname'], imageUrl, createdAt)
-        const likes = await Likes.findAll({ where:{ postId: postId}});
+        const likes = await Likes.findAll({ where:{ postID: postId}});
         //로그인한 유저가 좋아요한 글인지 표시
         const isMyLike = await Likes.findOne({where:{postID: postId, userID:userId}});
         let myLike = false;
@@ -107,7 +108,7 @@ router.get('/:postId', verify, async (req, res) => {
             return;
         }
         const {content, User, imageUrl, createdAt, userID} = post_temp;
-        const likes = await Likes.findAll({ where:{ postId: postId}});
+        const likes = await Likes.findAll({ where:{ postID: postId}});
         //로그인한 유저가 좋아요한 글인지 표시
         const isMyLike = await Likes.findOne({where:{postID: postId, userID:userId}});
         let myLike = false;
@@ -121,7 +122,7 @@ router.get('/:postId', verify, async (req, res) => {
             posts['postId'] = postId * 1;
             posts['userId'] = userID;
             posts['content'] = content;
-            postsInfos['commentCount']= comment.length;
+            posts['commentCount']= comment.length;
             posts['likeCount'] = likes.length;
             posts['nickname'] = User['nickname'];
             posts['imageUrl'] =imageUrl;
