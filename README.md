@@ -1,8 +1,6 @@
 # BE_instagram_clone
 항해99 4기 7주차 clone coding - instagram
 
-# JJal
-### 짤 업로드해 공유하는 공간
 #### 저희의 서비스가 궁금하시다면
 #### 유튜브주소 https://www.youtube.com/watch?v=DxQZ4e5tRxw
 #### 도메인주소 http://team2instagram.s3-website.ap-northeast-2.amazonaws.com/in/signIn
@@ -13,7 +11,7 @@
 - 이동호 : comment + login + signup
 - 정하나 : myPage + profile modify
 
-#### Frontend(React)
+#### Frontend(React) : https://github.com/eundol0519/cloneCodingProject
 - 신항민
 - 오은희
 - 최주영
