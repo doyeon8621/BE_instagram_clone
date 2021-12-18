@@ -1,5 +1,5 @@
 # BE_instagram_clone
-항해99 4기 7주차 clone coding - instagram
+항해99 4기 7주차 clone coding - instagram<br>
 ![image](https://user-images.githubusercontent.com/80023108/146629670-a0389404-6eca-438d-8733-eaf8d0ff945d.png)
 #### 저희의 서비스가 궁금하시다면
 #### 유튜브주소 https://www.youtube.com/watch?v=DxQZ4e5tRxw
