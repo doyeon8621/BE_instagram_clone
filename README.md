@@ -55,6 +55,11 @@
 - Get /api/users/:userId/posts
 - Post /api/users/:userId
 - Put /api/users/:userId
+
+## 🗂ERD
+![ERD](https://user-images.githubusercontent.com/93478396/146630306-61d678bd-df03-4613-972b-7aa69eb62c0d.png)
+
+
 ## 📜 핵심기능
 #### 로그인/회원가입
 - JWT를 이용하여 로그인과 회원가입 구현
