@@ -1,6 +1,6 @@
 # BE_instagram_clone
 항해99 4기 7주차 clone coding - instagram
-
+![image](https://user-images.githubusercontent.com/80023108/146629670-a0389404-6eca-438d-8733-eaf8d0ff945d.png)
 #### 저희의 서비스가 궁금하시다면
 #### 유튜브주소 https://www.youtube.com/watch?v=DxQZ4e5tRxw
 #### 도메인주소 http://team2instagram.s3-website.ap-northeast-2.amazonaws.com/in/signIn
@@ -85,7 +85,8 @@
 ## 🤦🏻 Trouble shooting
 - API명세를 자주 수정
     - 원래는 api작성시 라우터 이름을 활용해야 된다고만 생각했었는데, 중간멘토링 이후 그것이 잘못되었다는 것을 배웠다. 
-    - ex) POST /api/login (로그인 요청) → POST /api/user/image (회원 이미지 업로드)
+    - ex) POST /api/login (로그인 요청) <br>
+          POST /api/user/image (회원 이미지 업로드)
 - DB설계 시 foreignKey 작업 시 관계를 양쪽에 작성했던 문제
     - 한 쪽만 작성해서 중복이 없게 함
     - ex) db.Post.belongsTo(db.User, { foreignKey: 'userID', targetKey: 'userId', });
